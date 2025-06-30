@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import LineChart from "./LineChart";
 import { getWorkoutStatistics } from "../../supabase-client";
 import { useUserContext } from "../useUserContext";
 import type { ExerciseType, PlanType } from "../../types";
+import type { ChartOptions, TooltipItem } from "chart.js";
 
 const getWorkoutVolumeArr = (
   workoutStatistics: { created_at: string; workout: string }[],
@@ -63,7 +64,9 @@ const getAllPlanExerciseNames = (plan: PlanType) => {
 export function Statistics() {
   const { userData, currentPlanIdx } = useUserContext();
   const [exerciseName, setExercisesName] = useState(
-    getAllPlanExerciseNames(userData.planList[currentPlanIdx])[1]
+    userData.planList
+      ? getAllPlanExerciseNames(userData.planList[currentPlanIdx])[1]
+      : ""
   );
   const [workoutVolumeForShow, setWorkoutVolumeForShow] = useState<
     { x: string; y: number }[]
@@ -109,7 +112,7 @@ export function Statistics() {
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     plugins: {
       title: {
@@ -118,7 +121,7 @@ export function Statistics() {
       },
       tooltip: {
         callbacks: {
-          label: (context) => {
+          label: (context: TooltipItem<"line">) => {
             const label = context.dataset.label || "";
             const value = context.parsed.y;
             return `${label}: ${value} кг`;
@@ -152,30 +155,34 @@ export function Statistics() {
   };
 
   if (loading) {
-    return <div>Загрузка данных...</div>;
+    return <div>Loading...</div>;
   }
 
   if (workoutVolumeForShow.length === 0) {
-    return <div>Нет данных для отображения</div>;
+    return <div>No data to show</div>;
   }
 
   return (
     <div className="w-full h-1/2">
-      <div>
-        <select
-          onChange={(e) => {
-            setExercisesName(e.target.value);
-          }}
-          name=""
-          id=""
-        >
-          {getAllPlanExerciseNames(userData.planList[currentPlanIdx]).map(
-            (elem, idx) => (
-              <option key={elem + idx}>{elem}</option>
-            )
-          )}
-        </select>
-      </div>
+      {!userData.planList ? (
+        <div></div>
+      ) : (
+        <div>
+          <select
+            onChange={(e) => {
+              setExercisesName(e.target.value);
+            }}
+            name=""
+            id=""
+          >
+            {getAllPlanExerciseNames(userData.planList[currentPlanIdx]).map(
+              (elem, idx) => (
+                <option key={elem + idx}>{elem}</option>
+              )
+            )}
+          </select>
+        </div>
+      )}
       <LineChart data={chartData} options={options} />
     </div>
   );

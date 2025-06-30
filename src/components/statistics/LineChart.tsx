@@ -12,7 +12,7 @@ import {
   TimeScale,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
-
+import type { ChartOptions } from "chart.js";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -24,18 +24,22 @@ ChartJS.register(
   TimeScale
 );
 
+interface Dataset {
+  label: string;
+  data: { x: string; y: number }[] | number[];
+  borderColor: string;
+  backgroundColor: string;
+  tension?: number;
+  pointRadius?: number;
+  pointHoverRadius?: number;
+}
+
 interface LineChartProps {
   data: {
-    labels: string[];
-    datasets: {
-      label: string;
-      data: number[];
-      borderColor: string;
-      backgroundColor: string;
-      tension?: number;
-    }[];
+    labels?: string[];
+    datasets: Dataset[];
   };
-  options?: any;
+  options?: ChartOptions<"line">;
 }
 
 const LineChart: React.FC<LineChartProps> = ({ data, options }) => {
