@@ -12,16 +12,22 @@ interface PropsType {
 export function SignUp({ setShowAuthorizationForm }: PropsType) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [signUpNote, setSignUpNote] = useState("");
   const signUpHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      if (password.length < 6) {
+        setSignUpNote("Password need minimum 6 symbols");
+        return;
+      }
       const { data: user, error: signUpError } = await supabase.auth.signUp({
         email: email,
         password: password,
       });
       if (signUpError) {
         console.log("Sign Up error: " + signUpError.message);
+        console.log(signUpError.message);
+        setSignUpNote("Sign Up error");
         return;
       }
       const { error: insertUserPlansError } = await supabase
@@ -29,7 +35,7 @@ export function SignUp({ setShowAuthorizationForm }: PropsType) {
         .insert([{ user_id: user.user?.id }]);
       if (insertUserPlansError) {
         console.log(
-          "Insert email in db error: " + insertUserPlansError.message
+          "Insert email in db error: " + insertUserPlansError.message,
         );
       }
       const { error: insertUserDietDataError } = await supabase
@@ -37,23 +43,27 @@ export function SignUp({ setShowAuthorizationForm }: PropsType) {
         .insert([{ user_id: user.user?.id }]);
       if (insertUserDietDataError) {
         console.log(
-          "Insert user diet data error: " + insertUserDietDataError.message
+          "Insert user diet data error: " + insertUserDietDataError.message,
         );
       }
+      return true;
     } catch {
       console.log("Supabase is unavailable");
     }
   };
 
   return (
-    <div className=" fixed flex items-center justify-center top-0 left-0 w-screen h-screen bg-bg text-2xl text-text-main">
+    <div className="bg-bg text-text-main fixed top-0 left-0 flex h-screen w-screen items-center justify-center text-2xl">
       <form
         onSubmit={(e) =>
-          signUpHandler(e).then(() => {
-            window.location.reload();
+          signUpHandler(e).then((res) => {
+            if (res) {
+              window.location.reload();
+            }
+            return;
           })
         }
-        className="flex relative flex-col justify-center items-center gap-10 w-100 h-100 bg-bg border-2 border-border"
+        className="bg-bg border-border relative flex h-100 w-88 flex-col items-center justify-center gap-10 rounded-xl border-2 sm:w-100"
       >
         <span
           onClick={() => {
@@ -62,12 +72,12 @@ export function SignUp({ setShowAuthorizationForm }: PropsType) {
               signOut: false,
             });
           }}
-          className="absolute top-0 right-0 pr-5 hover:text-error cursor-pointer"
+          className="hover:text-error active:text-error absolute top-0 right-0 cursor-pointer pr-5"
         >
           Close
         </span>
         <input
-          className="outline-0 bg-bg-secondary border-2 border-border px-2"
+          className="bg-bg-secondary border-border border-2 px-2 outline-0"
           type="email"
           placeholder="Email..."
           value={email}
@@ -76,7 +86,7 @@ export function SignUp({ setShowAuthorizationForm }: PropsType) {
           }}
         />
         <input
-          className="outline-0 bg-bg-secondary border-2 border-border px-2"
+          className="bg-bg-secondary border-border border-2 px-2 outline-0"
           type="password"
           placeholder="Password..."
           value={password}
@@ -84,9 +94,10 @@ export function SignUp({ setShowAuthorizationForm }: PropsType) {
             setPassword(e.target.value);
           }}
         />
+        <span className="text-error text-xl empty:hidden">{signUpNote}</span>
         <button
           type="submit"
-          className="border-2 border-border py-2 px-4 rounded-xl bg-bg-secondary hover:bg-button-hover transition-colors duration-300"
+          className="border-border bg-bg-secondary hover:bg-button-hover active:bg-button-hover cursor-pointer rounded-xl border-2 px-4 py-2 transition-colors duration-300 active:scale-96"
         >
           Sign Up
         </button>

@@ -8,20 +8,19 @@ import { Plan } from "./components/plan/Plan";
 import { Statistics } from "./components/statistics/Statistics";
 import { UserContextProvider } from "./components/UserContext";
 import { supabase } from "./supabase-client";
-
 function App() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const [openTab, setOpenTab] = useState("Home");
   const [isUserSignIn, setIsUserSignIn] = useState(false);
-
+  const [userName, setUserName] = useState<string | undefined>(undefined);
   const getUser = async () => {
-    const { error: getUserError } = await supabase.auth.getUser();
+    const { data, error: getUserError } = await supabase.auth.getUser();
     if (getUserError) {
       console.log("Get user error: " + getUserError.message);
       return;
     }
-
+    setUserName(data.user.email);
     setIsUserSignIn(true);
   };
 
@@ -31,40 +30,46 @@ function App() {
 
   return (
     <UserContextProvider>
-      <div id="App" className="flex flex-col relative z-10  min-h-screen bg-bg">
+      <div
+        id="App"
+        className="bg-bg relative z-10 flex min-h-screen flex-col md:flex-row"
+      >
         {modalIsOpen && (
           <div
             onClick={() => {
               setModalIsOpen(false);
               setSidebarIsOpen(false);
             }}
-            className="absolute z-10 top-0 left-0 w-screen h-screen bg-black opacity-50"
+            className="absolute top-0 left-0 z-10 h-screen w-screen bg-black opacity-50 md:hidden"
           ></div>
         )}
-        <Header
+        <Sidebar
+          sidebarIsOpen={sidebarIsOpen}
           setSidebarIsOpen={setSidebarIsOpen}
           setModalIsOpen={setModalIsOpen}
-          sidebarIsOpen={sidebarIsOpen}
-          isUserSignIn={isUserSignIn}
+          setOpenTab={setOpenTab}
+          openTab={openTab}
         />
-        {openTab === "Workout" ? (
-          <Workout />
-        ) : openTab === "Diet" ? (
-          <Diet />
-        ) : openTab === "Plan" ? (
-          <Plan />
-        ) : openTab === "Statistics" ? (
-          <Statistics />
-        ) : (
-          <Home isUserSignIn={isUserSignIn} />
-        )}
-        <div>
-          <Sidebar
-            sidebarIsOpen={sidebarIsOpen}
+        <div className="w-full">
+          <Header
             setSidebarIsOpen={setSidebarIsOpen}
             setModalIsOpen={setModalIsOpen}
-            setOpenTab={setOpenTab}
+            sidebarIsOpen={sidebarIsOpen}
+            isUserSignIn={isUserSignIn}
+            userName={userName}
           />
+
+          {openTab === "Workout" ? (
+            <Workout />
+          ) : openTab === "Diet" ? (
+            <Diet />
+          ) : openTab === "Plan" ? (
+            <Plan />
+          ) : openTab === "Statistics" ? (
+            <Statistics />
+          ) : (
+            <Home isUserSignIn={isUserSignIn} />
+          )}
         </div>
       </div>
     </UserContextProvider>

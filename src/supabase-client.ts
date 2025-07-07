@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { PlanType, ExerciseType } from "./types";
 export const supabase = createClient(
   import.meta.env.VITE_API_ADDRESS,
-  import.meta.env.VITE_API_KEY
+  import.meta.env.VITE_API_KEY,
 );
 
 export const updateUserPlans = async (plans: PlanType[]) => {
@@ -66,7 +66,7 @@ export const getWorkoutData = async (date?: number) => {
 export const updateWorkoutData = async (
   date: number,
   data?: ExerciseType[] | [],
-  workoutStatus?: boolean
+  workoutStatus?: boolean,
 ) => {
   const user = await getUser();
   const workoutDate = new Date(date);

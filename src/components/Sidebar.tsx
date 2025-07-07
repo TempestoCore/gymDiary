@@ -8,6 +8,7 @@ interface PropsType {
   setSidebarIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarIsOpen: boolean;
   setOpenTab: React.Dispatch<React.SetStateAction<string>>;
+  openTab: string;
 }
 
 export function Sidebar({
@@ -15,6 +16,7 @@ export function Sidebar({
   setModalIsOpen,
   setSidebarIsOpen,
   setOpenTab,
+  openTab,
 }: PropsType) {
   const openTapHandler = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
     setOpenTab(`${e.currentTarget.innerText}`);
@@ -31,27 +33,26 @@ export function Sidebar({
 
   return (
     <div
-      className={`fixed flex flex-col top-0 left-0 z-60 h-screen w-50 bg-bg ${
-        sidebarIsOpen ? "translate-x-0" : "-translate-x-50"
-      } border-r-2 border-border transition-all duration-200`}
+      className={`bg-bg fixed top-0 left-0 z-60 flex h-screen flex-col md:relative ${
+        sidebarIsOpen ? "w-50 translate-x-0" : "w-0 -translate-x-50"
+      } border-border border-r-2 transition-all duration-200`}
     >
-      <div className="flex justify-between items-center h-15 w-full ">
-        <h1 className="text-2xl ml-2 text-button">Gym Dairy</h1>
+      <div className="border-border bg-bg-secondary flex h-15 w-full items-center justify-between border-b-2">
+        <h1 className="text-button ml-2 text-2xl">Gym Dairy</h1>
         <PiTextAlignRight
           onClick={() => {
             setModalIsOpen(false);
             setSidebarIsOpen(false);
           }}
-          className="size-10 mr-5 text-text-main hover:text-button-hover transition-colors duration-300"
+          className="text-text-main active:text-button-hover hover:text-button-hover mr-5 size-10 cursor-pointer transition-colors duration-300"
         />
       </div>
-      <ul className="flex flex-col gap-1 w-50 text-2xl text-text-main">
+      <ul className="text-text-main flex w-50 flex-col text-2xl">
         <li
           onClick={(e) => {
             openTapHandler(e);
           }}
-          className="flex items-center gap-1 hover:bg-bg-secondary w-full h-10 pl-2 select-none hover:border-y-1
-         hover:border-border hover:border-r-2"
+          className={`hover:bg-bg-secondary active:bg-bg-secondary hover:border-border ${openTab === "Home" ? "bg-bg-secondary border-border border-r-2" : "border-0"} hover:border-t-bg-secondary flex h-13 w-full cursor-pointer items-center gap-1 pl-2 select-none hover:border-y-2 hover:border-r-2 hover:border-b-2`}
         >
           <FaHome className="text-button" />
           Home
@@ -60,8 +61,7 @@ export function Sidebar({
           onClick={(e) => {
             openTapHandler(e);
           }}
-          className="flex items-center gap-1 hover:bg-bg-secondary w-full h-10 pl-2 select-none hover:border-y-1
-         hover:border-border hover:border-r-2"
+          className={`hover:bg-bg-secondary active:bg-bg-secondary hover:border-border ${openTab === "Workout" ? "bg-bg-secondary border-border border-r-2" : "border-0"} flex h-13 w-full cursor-pointer items-center gap-1 pl-2 select-none hover:border-y-2 hover:border-r-2`}
         >
           <GiGymBag className="text-button" />
           Workout
@@ -70,8 +70,7 @@ export function Sidebar({
           onClick={(e) => {
             openTapHandler(e);
           }}
-          className="flex items-center gap-1 hover:bg-bg-secondary w-full h-10 pl-2 select-none hover:border-y-1
-         hover:border-border hover:border-r-2"
+          className={`hover:bg-bg-secondary active:bg-bg-secondary hover:border-border ${openTab === "Diet" ? "bg-bg-secondary border-border border-r-2" : "border-0"} flex h-13 w-full cursor-pointer items-center gap-1 pl-2 select-none hover:border-y-2 hover:border-r-2`}
         >
           <IoFastFoodOutline className="text-button" />
           Diet
@@ -80,8 +79,7 @@ export function Sidebar({
           onClick={(e) => {
             openTapHandler(e);
           }}
-          className="flex items-center gap-1 hover:bg-bg-secondary w-full h-10 pl-2 select-none hover:border-y-1
-         hover:border-border hover:border-r-2"
+          className={`hover:bg-bg-secondary active:bg-bg-secondary hover:border-border ${openTab === "Plan" ? "bg-bg-secondary border-border border-r-2" : "border-0"} flex h-13 w-full cursor-pointer items-center gap-1 pl-2 select-none hover:border-y-2 hover:border-r-2`}
         >
           <PiBookFill className="text-button" />
           Plan
@@ -90,18 +88,16 @@ export function Sidebar({
           onClick={(e) => {
             openTapHandler(e);
           }}
-          className="flex items-center gap-1 hover:bg-bg-secondary w-full h-10 pl-2 select-none hover:border-y-1
-         hover:border-border hover:border-r-2"
+          className={`hover:bg-bg-secondary active:bg-bg-secondary hover:border-border ${openTab === "Statistics" ? "bg-bg-secondary border-border border-r-2" : "border-0"} flex h-13 w-full cursor-pointer items-center gap-1 pl-2 select-none hover:border-y-2 hover:border-r-2`}
         >
           <IoIosStats className="text-button" />
           Statistics
         </li>
       </ul>
-      <div className="flex flex-col grow justify-end items-center pb-10">
+      <div className="flex grow flex-col items-center justify-end pb-10">
         <button
           onClick={switchThemeHandler}
-          className="bg-bg-secondary border-2 border-border text-text-main select-none text-2xl py-2 rounded-sm w-5/10
-           hover:bg-button-hover transition-color duration-300"
+          className="bg-bg-secondary active:bg-button-hover border-border text-text-main hover:bg-button-hover transition-color w-5/10 cursor-pointer rounded-xl border-2 py-2 text-2xl duration-300 select-none active:scale-96"
         >
           Theme
         </button>

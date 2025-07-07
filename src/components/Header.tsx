@@ -6,6 +6,7 @@ interface PropsType {
   setSidebarIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarIsOpen: boolean;
   isUserSignIn: boolean;
+  userName: string | undefined;
 }
 import { PiTextAlignLeft } from "react-icons/pi";
 import { supabase } from "../supabase-client";
@@ -16,6 +17,7 @@ export function Header({
   setModalIsOpen,
   sidebarIsOpen,
   isUserSignIn,
+  userName,
 }: PropsType) {
   const { loadingData } = useUserContext();
   const [showAuthorizationForm, setShowAuthorizationForm] = useState({
@@ -33,7 +35,7 @@ export function Header({
   };
 
   return (
-    <header className="flex items-center justify-between w-full h-15 bg-bg border-b-2 border-border">
+    <header className="bg-bg-secondary border-border flex h-15 w-full items-center justify-between border-b-2">
       <PiTextAlignLeft
         onClick={() => {
           if (!isUserSignIn) return;
@@ -42,18 +44,21 @@ export function Header({
         }}
         className={`${
           loadingData
-            ? "text-button-hover animate-pulse pointer-events-none"
+            ? "text-button-hover pointer-events-none animate-pulse"
             : "text-text-main"
-        } cursor-pointer ml-5 size-10  hover:text-button-hover transition-colors duration-300 ${
+        } hover:text-button-hover ml-5 size-10 cursor-pointer transition-colors duration-300 ${
           sidebarIsOpen ? "invisible" : "visible"
         }`}
       />
-      <div className="flex mr-3 text-2xl text-text-main">
+      <span className="text-text-secondary mr-10 ml-auto justify-end truncate text-2xl">
+        {userName}
+      </span>
+      <div className="text-text-main mr-3 flex text-2xl">
         {loadingData ? (
-          <span className="w-23 h-8 bg-button-hover animate-pulse rounded-2xl"></span>
+          <span className="bg-button-hover h-8 w-23 animate-pulse rounded-2xl"></span>
         ) : isUserSignIn ? (
           <span
-            className="cursor-pointer hover:text-button-hover"
+            className="hover:text-button-hover active:text-button-hover ease cursor-pointer transition-colors duration-300"
             onClick={signOutHandler}
           >
             Sign Out
@@ -61,7 +66,7 @@ export function Header({
         ) : (
           <>
             <span
-              className="cursor-pointer hover:text-button-hover"
+              className="hover:text-button-hover active:text-button-hover cursor-pointer"
               onClick={() => {
                 setShowAuthorizationForm({
                   signIn: false,
@@ -73,7 +78,7 @@ export function Header({
             </span>
             /
             <span
-              className="cursor-pointer hover:text-button-hover"
+              className="hover:text-button-hover active:text-button-hover cursor-pointer"
               onClick={() => {
                 setShowAuthorizationForm({
                   signIn: true,
