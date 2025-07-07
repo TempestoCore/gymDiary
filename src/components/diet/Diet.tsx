@@ -1,5 +1,5 @@
 import { CreateDiet } from "./CreateDiet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AddMeal } from "./AddMeal";
 import { SelectDiet } from "./SelectDiet";
 import { ContextMenu } from "./ContextMenu";
@@ -35,16 +35,26 @@ const dayOfWeekShort = [
   "Su", // Sunday
 ];
 
+const daysOfWeekLong = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
 export function Diet() {
   const { userData, currentDietIdx } = useUserContext();
   const [dietList, setDietList] = useState<DietType[] | []>(userData.dietList);
   const [currentDiet, setCurrentDiet] = useState<number | undefined>(
-    currentDietIdx
+    currentDietIdx,
   );
   const [createNewDiet, setCreateNewDiet] = useState(false);
   const [selectDiet, setSelectDiet] = useState(false);
   const [currentDay, setCurrentDay] = useState(
-    daysOfWeek[new Date().getDay()] as WeekdayKeys
+    daysOfWeek[new Date().getDay()] as WeekdayKeys,
   );
   const [openAddMeal, setOpenAddMeal] = useState(false);
   const [menu, setMenu] = useState<{
@@ -58,7 +68,7 @@ export function Diet() {
     y: 0,
     targetId: null,
   });
-
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const changeCurrentDayHandler = (idx: number) => {
     const trueIdx = idx < 6 ? idx + 1 : 0;
     setCurrentDay(daysOfWeek[trueIdx] as WeekdayKeys);
@@ -79,7 +89,7 @@ export function Diet() {
 
   const ContextMenuHandler = (
     e: React.MouseEvent<HTMLTableDataCellElement, MouseEvent>,
-    idx: number
+    idx: number,
   ) => {
     e.preventDefault();
     setMenu({
@@ -107,8 +117,18 @@ export function Diet() {
     setMenu({ ...menu, visible: false });
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
-    <div className="flex relative grow">
+    <div className="relative flex grow">
       {menu.visible && (
         <ContextMenu
           x={menu.x}
@@ -137,35 +157,37 @@ export function Diet() {
           setCurrentDiet={setCurrentDiet}
         />
       ) : (
-        <div className="flex flex-col grow relative">
-          <div className="flex justify-around border-b-2 h-14 border-border text-text-main text-xl">
-            {dayOfWeekShort.map((elem, idx) => (
-              <button
-                onClick={() => {
-                  changeCurrentDayHandler(idx);
-                }}
-                className={`cursor-pointer ${
-                  currentDay == daysOfWeek[idx < 6 ? idx + 1 : 0]
-                    ? "text-button"
-                    : ""
-                } hover:text-button-hover transition-colors duration-300`}
-                key={elem + idx}
-              >
-                {elem}
-              </button>
-            ))}
+        <div className="relative flex grow flex-col">
+          <div className="border-border text-text-main flex h-14 justify-around border-b-2 text-xl">
+            {(windowWidth > 800 ? daysOfWeekLong : dayOfWeekShort).map(
+              (elem, idx) => (
+                <button
+                  onClick={() => {
+                    changeCurrentDayHandler(idx);
+                  }}
+                  className={`cursor-pointer ${
+                    currentDay == daysOfWeek[idx < 6 ? idx + 1 : 0]
+                      ? "text-button"
+                      : ""
+                  } hover:text-button-hover transition-colors duration-300`}
+                  key={elem + idx}
+                >
+                  {elem}
+                </button>
+              ),
+            )}
           </div>
-          <div className="flex justify-between px-4 text-xl text-text-main">
+          <div className="text-text-main flex justify-between px-4 text-xl">
             <div className="flex flex-col">
               <span
                 onClick={() => {
                   setSelectDiet(true);
                 }}
-                className=" cursor-pointer hover:text-button-hover transition-colors duration-300"
+                className="hover:text-button-hover cursor-pointer transition-colors duration-300"
               >
                 Select Diet
               </span>
-              <span className="flex text-text-secondary text-xl justify-center">
+              <span className="text-text-secondary flex justify-center text-xl">
                 {dietList.length > 0 &&
                   dietList[currentDiet as number].dietName}
               </span>
@@ -175,7 +197,7 @@ export function Diet() {
                 onClick={() => {
                   setCreateNewDiet(true);
                 }}
-                className=" cursor-pointer hover:text-button-hover transition-colors duration-300"
+                className="hover:text-button-hover cursor-pointer transition-colors duration-300"
               >
                 Create a new Diet
               </span>
@@ -185,33 +207,33 @@ export function Diet() {
             dietList[currentDiet as number][currentDay].map((elem, idx) => (
               <table
                 key={elem.mealName + idx}
-                className="w-full table-fixed  text-center text-text-main text-xl border-2 border-border mb-2"
+                className="text-text-main border-border mb-2 w-full table-fixed border-2 text-center text-xl"
               >
                 <tbody>
-                  <tr className="border-b-2 border-border bg-bg-secondary">
+                  <tr className="border-border bg-bg-secondary border-b-2">
                     <td
                       onContextMenu={(e) => {
                         ContextMenuHandler(e, idx);
                       }}
-                      className=" truncate text-2xl hover:bg-button-hover transition-colors duration-300"
+                      className="hover:bg-button-hover truncate text-2xl transition-colors duration-300"
                       colSpan={2}
                     >
                       {elem.mealName}
                     </td>
                   </tr>
                   <tr>
-                    <td className="border-b-2 border-r-2 border-border w-1/2">
+                    <td className="border-border w-1/2 border-r-2 border-b-2">
                       Food
                     </td>
-                    <td className="border-b-2 border-border">Weight</td>
+                    <td className="border-border border-b-2">Weight</td>
                   </tr>
                   {elem.meal.map((food, idx) => (
                     <tr key={elem.mealName + Object.keys(food[1])[0]}>
                       <td
                         className={`${
                           food.length === idx
-                            ? "border-r-2 border-border"
-                            : "border-b-2 border-r-2 border-border"
+                            ? "border-border border-r-2"
+                            : "border-border border-r-2 border-b-2"
                         } truncate`}
                       >
                         {Object.keys(food[1])[0]}
@@ -220,14 +242,14 @@ export function Diet() {
                         className={`${
                           food.length === idx
                             ? ""
-                            : "border-b-2 border-r-2 border-border"
+                            : "border-border border-r-2 border-b-2"
                         } truncate`}
                       >
                         {food[0]}
                       </td>
                     </tr>
                   ))}
-                  <tr className="border-t-2 border-border">
+                  <tr className="border-border border-t-2">
                     <td colSpan={2}>
                       {"Proteins: " +
                         nutrientsMealSum(elem).proteins.toFixed(1) +
@@ -254,7 +276,7 @@ export function Diet() {
               onClick={() => {
                 setOpenAddMeal(true);
               }}
-              className="text-text-main text-2xl border-2 border-border rounded-xl px-4 py-2 cursor-pointer hover:border-button-hover"
+              className="text-text-main border-border hover:border-button-hover cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl"
             >
               Add Meal
             </button>
