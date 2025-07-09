@@ -45,7 +45,11 @@ const daysOfWeekLong = [
   "Sunday",
 ];
 
-export function Diet() {
+interface PropsType {
+  sidebarIsOpen: boolean;
+}
+
+export function Diet({ sidebarIsOpen }: PropsType) {
   const { userData, currentDietIdx } = useUserContext();
   const [dietList, setDietList] = useState<DietType[] | []>(userData.dietList);
   const [currentDiet, setCurrentDiet] = useState<number | undefined>(
@@ -128,10 +132,10 @@ export function Diet() {
   }, []);
 
   return (
-    <div className="relative flex grow">
+    <div className="relative flex h-[calc(100%-60px)] overflow-auto">
       {menu.visible && (
         <ContextMenu
-          x={menu.x}
+          x={sidebarIsOpen ? menu.x - 200 : menu.x}
           y={menu.y}
           onDelete={mealDeleteHandler}
           onClose={closeMenu}
@@ -145,6 +149,7 @@ export function Diet() {
         />
       ) : openAddMeal ? (
         <AddMeal
+          sidebarIsOpen={sidebarIsOpen}
           setDietList={setDietList}
           setOpenAddMeal={setOpenAddMeal}
           currentDay={currentDay}
@@ -155,9 +160,10 @@ export function Diet() {
           setSelectDiet={setSelectDiet}
           dietList={dietList}
           setCurrentDiet={setCurrentDiet}
+          setDietList={setDietList}
         />
       ) : (
-        <div className="relative flex grow flex-col">
+        <div className="relative flex w-full grow flex-col">
           <div className="border-border text-text-main flex h-14 justify-around border-b-2 text-xl">
             {(windowWidth > 800 ? daysOfWeekLong : dayOfWeekShort).map(
               (elem, idx) => (
@@ -203,80 +209,82 @@ export function Diet() {
               </span>
             </div>
           </div>
-          {dietList[currentDiet as number][currentDay].length > 0 &&
-            dietList[currentDiet as number][currentDay].map((elem, idx) => (
-              <table
-                key={elem.mealName + idx}
-                className="text-text-main border-border mb-2 w-full table-fixed border-2 text-center text-xl"
-              >
-                <tbody>
-                  <tr className="border-border bg-bg-secondary border-b-2">
-                    <td
-                      onContextMenu={(e) => {
-                        ContextMenuHandler(e, idx);
-                      }}
-                      className="hover:bg-button-hover truncate text-2xl transition-colors duration-300"
-                      colSpan={2}
-                    >
-                      {elem.mealName}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-border w-1/2 border-r-2 border-b-2">
-                      Food
-                    </td>
-                    <td className="border-border border-b-2">Weight</td>
-                  </tr>
-                  {elem.meal.map((food, idx) => (
-                    <tr key={elem.mealName + Object.keys(food[1])[0]}>
+          <div className="mx-1 flex flex-col items-center md:mx-40">
+            {dietList[currentDiet as number][currentDay].length > 0 &&
+              dietList[currentDiet as number][currentDay].map((elem, idx) => (
+                <table
+                  key={elem.mealName + idx}
+                  className={`text-text-main border-border mb-2 w-full table-fixed border-2 text-center text-xl`}
+                >
+                  <tbody>
+                    <tr className="border-border bg-bg-secondary border-b-2">
                       <td
-                        className={`${
-                          food.length === idx
-                            ? "border-border border-r-2"
-                            : "border-border border-r-2 border-b-2"
-                        } truncate`}
+                        onContextMenu={(e) => {
+                          ContextMenuHandler(e, idx);
+                        }}
+                        className="hover:bg-button-hover truncate text-2xl transition-colors duration-300"
+                        colSpan={2}
                       >
-                        {Object.keys(food[1])[0]}
-                      </td>
-                      <td
-                        className={`${
-                          food.length === idx
-                            ? ""
-                            : "border-border border-r-2 border-b-2"
-                        } truncate`}
-                      >
-                        {food[0]}
+                        {elem.mealName}
                       </td>
                     </tr>
-                  ))}
-                  <tr className="border-border border-t-2">
-                    <td colSpan={2}>
-                      {"Proteins: " +
-                        nutrientsMealSum(elem).proteins.toFixed(1) +
-                        "g" +
-                        " - " +
-                        " Fats: " +
-                        nutrientsMealSum(elem).fats.toFixed(1) +
-                        "g" +
-                        " - " +
-                        " Carbs: " +
-                        nutrientsMealSum(elem).carbohydrates.toFixed(1) +
-                        "g" +
-                        " - " +
-                        " Kcal: " +
-                        nutrientsMealSum(elem).kcal.toFixed(1) +
-                        "g"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            ))}
+                    <tr>
+                      <td className="border-border w-1/2 border-r-2 border-b-2">
+                        Food
+                      </td>
+                      <td className="border-border border-b-2">Weight</td>
+                    </tr>
+                    {elem.meal.map((food, idx) => (
+                      <tr key={elem.mealName + Object.keys(food[1])[0]}>
+                        <td
+                          className={`${
+                            food.length === idx
+                              ? "border-border border-r-2"
+                              : "border-border border-r-2 border-b-2"
+                          } truncate`}
+                        >
+                          {Object.keys(food[1])[0]}
+                        </td>
+                        <td
+                          className={`${
+                            food.length === idx
+                              ? ""
+                              : "border-border border-b-2"
+                          } truncate`}
+                        >
+                          {food[0]}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="border-border border-t-2">
+                      <td colSpan={2}>
+                        {"Proteins: " +
+                          nutrientsMealSum(elem).proteins.toFixed(1) +
+                          "g" +
+                          " - " +
+                          " Fats: " +
+                          nutrientsMealSum(elem).fats.toFixed(1) +
+                          "g" +
+                          " - " +
+                          " Carbs: " +
+                          nutrientsMealSum(elem).carbohydrates.toFixed(1) +
+                          "g" +
+                          " - " +
+                          " Kcal: " +
+                          nutrientsMealSum(elem).kcal.toFixed(1) +
+                          "g"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              ))}
+          </div>
           <div className="flex justify-center">
             <button
               onClick={() => {
                 setOpenAddMeal(true);
               }}
-              className="text-text-main border-border hover:border-button-hover cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl"
+              className="border-border text-text-main bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
             >
               Add Meal
             </button>

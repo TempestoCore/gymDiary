@@ -1,7 +1,7 @@
 import type { ExerciseType, PlanType } from "../../types";
 import { List } from "./List";
 import { CreatePlan } from "./CreatePlan";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Exercise } from "./Exercise";
 import { updateUserPlans } from "../../supabase-client";
 import { useUserContext } from "../useUserContext";
@@ -23,17 +23,49 @@ const dayOfWeek: DayType[] = [
   "Saturday",
   "Sunday",
 ];
+const daysOfWeek = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const dayOfWeekShort = [
+  "Mo", // Monday
+  "Tu", // Tuesday
+  "We", // Wednesday
+  "Th", // Thursday
+  "Fr", // Friday
+  "Sa", // Saturday
+  "Su", // Sunday
+];
+
 export function Plan() {
   const { userData, currentPlanIdx } = useUserContext();
   const defaultPlanList = userData.planList || [];
   const [planList, setPlanList] = useState<PlanType[]>(defaultPlanList);
   const [currentPlan, setCurrentPlan] = useState(currentPlanIdx);
-  const [currentDay, setCurrentDay] = useState<DayType>("Monday");
+  const [currentDay, setCurrentDay] = useState<DayType>(
+    daysOfWeek[new Date().getDay()] as DayType,
+  );
   const [createNewPlan, setCreateNewPlan] = useState(false);
   const [edit, setEdit] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
-    <div className="grow flex flex-col ">
+    <div className="flex h-[calc(100%-60px)] flex-col overflow-y-auto">
       {planList.length == 0 || createNewPlan ? (
         <CreatePlan
           setPlanList={setPlanList}
@@ -42,7 +74,24 @@ export function Plan() {
         />
       ) : (
         <div className="flex flex-col">
-          <div className="w-full flex justify-between">
+          <div className="border-border text-text-main flex h-14 justify-around border-b-2 text-xl">
+            {dayOfWeek.map((elem, idx) => (
+              <button
+                onClick={() => {
+                  setCurrentDay(elem);
+                }}
+                className={`cursor-pointer ${
+                  currentDay == daysOfWeek[idx < 6 ? idx + 1 : 0]
+                    ? "text-button"
+                    : ""
+                } hover:text-button-hover transition-colors duration-300`}
+                key={elem}
+              >
+                {windowWidth > 800 ? elem : dayOfWeekShort[idx]}
+              </button>
+            ))}
+          </div>
+          <div className="flex w-full justify-between">
             <List
               planList={planList}
               setCreateNewPlan={setCreateNewPlan}
@@ -56,33 +105,15 @@ export function Plan() {
                 }
                 setEdit((prev) => !prev);
               }}
-              className="text-text-secondary text-2xl cursor-pointer pr-4 hover:text-button transition-colors duration-300"
+              className="text-text-secondary hover:text-button cursor-pointer pr-4 text-2xl transition-colors duration-300"
             >
               {`${edit ? "Save" : "Edit"}`}
             </button>
           </div>
-          <h2 className="text-text-main text-3xl text-center overflow-hidden">
+          <h2 className="text-text-main overflow-hidden text-center text-3xl">
             {planList[currentPlan].planName}
           </h2>
-          <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {dayOfWeek.map((elem) => (
-              <button
-                onClick={() => {
-                  setCurrentDay(elem);
-                }}
-                className={`border-2 px-2 ${
-                  currentDay == elem
-                    ? "bg-button-hover"
-                    : planList[currentPlan][elem].length == 0
-                    ? "bg-bg-secondary"
-                    : "bg-button"
-                } border-border cursor-pointer rounded-xl text-text-main text-xl hover:bg-button-hover transition-colors duration-200`}
-                key={elem}
-              >
-                {elem}
-              </button>
-            ))}
-          </div>
+
           <div className="flex flex-col items-center">
             {planList[currentPlan][currentDay].map((elem, idx) => (
               <Exercise
@@ -96,7 +127,7 @@ export function Plan() {
               />
             ))}
           </div>
-          <div className="w-full flex justify-center items-center">
+          <div className="flex w-full items-center justify-center">
             {edit ? (
               <div
                 onClick={() => {
@@ -109,12 +140,12 @@ export function Plan() {
                       weightRep: [[0, 0]],
                     };
                     (newArr[currentPlan][currentDay] as ExerciseType[]).push(
-                      newExercise
+                      newExercise,
                     );
                     return newArr;
                   });
                 }}
-                className="border-2 select-none cursor-pointer border-border text-2xl text-text-main px-4 py-2 mt-4 rounded-xl hover:bg-button-hover transition-colors duration-300"
+                className="border-border text-text-main hover:bg-button-hover mt-4 cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 select-none"
               >
                 Add a new exercise
               </div>
@@ -122,7 +153,7 @@ export function Plan() {
               <></>
             )}
           </div>
-          <div className="flex flex-col items-center mt-4">
+          <div className="mt-4 flex flex-col items-center">
             <label
               className="text-text-main text-2xl select-none"
               htmlFor="comment"
@@ -140,7 +171,7 @@ export function Plan() {
                 });
               }}
               id="comment"
-              className={`border-2 text-text-main text-xl border-border bg-bg-secondary px-2 w-1/2 min-h-50`}
+              className={`text-text-main border-border bg-bg-secondary min-h-50 w-1/2 border-2 px-2 text-xl`}
             />
           </div>
         </div>

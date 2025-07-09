@@ -32,7 +32,7 @@ export function ContextMenu({ x, y, onDelete, onClose }: PropsType) {
         top: y - 60,
         boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
       }}
-      className={`cursor-pointer text-2xl text-text-main py-2 px-4 rounded-xl hover:bg-error absolute  bg-bg-secondary border-2 border-border z-1000`}
+      className={`text-text-main border-border "border-border bg-bg-secondary active:border-error hover:border-error active:bg-error ease active:scale-96" absolute z-1000 cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300`}
     >
       Delete
     </div>

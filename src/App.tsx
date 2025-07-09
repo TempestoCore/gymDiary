@@ -32,7 +32,7 @@ function App() {
     <UserContextProvider>
       <div
         id="App"
-        className="bg-bg relative z-10 flex min-h-screen flex-col md:flex-row"
+        className="bg-bg relative z-10 flex h-dvh min-h-screen flex-col md:flex-row"
       >
         {modalIsOpen && (
           <div
@@ -50,7 +50,7 @@ function App() {
           setOpenTab={setOpenTab}
           openTab={openTab}
         />
-        <div className="w-full">
+        <div className="flex h-full w-full flex-col">
           <Header
             setSidebarIsOpen={setSidebarIsOpen}
             setModalIsOpen={setModalIsOpen}
@@ -62,7 +62,7 @@ function App() {
           {openTab === "Workout" ? (
             <Workout />
           ) : openTab === "Diet" ? (
-            <Diet />
+            <Diet sidebarIsOpen={sidebarIsOpen} />
           ) : openTab === "Plan" ? (
             <Plan />
           ) : openTab === "Statistics" ? (

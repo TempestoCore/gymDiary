@@ -4,6 +4,7 @@
 @theme {
   --color-bg: #ffffff;
   --color-bg-secondary: #f8fafc;
+  --color-bg-secondary-transparent: rgba(248, 250, 252, 0.5);
   --color-text-main: #1a1a1a;
   --color-text-secondary: #6b7280;
   --color-border: #e5e7eb;
@@ -28,6 +29,7 @@
 .dark {
   --color-bg: #0f172a;
   --color-bg-secondary: #1e293b;
+  --color-bg-secondary-transparent: rgba(30, 41, 59, 0.5);
   --color-text-main: #e0e0e0;
   --color-text-secondary: #94a3b8;
   --color-border: #334155;

@@ -15,6 +15,7 @@ interface PropsType {
   currentDiet: number | undefined;
   setOpenAddMeal: React.Dispatch<React.SetStateAction<boolean>>;
   setDietList: React.Dispatch<React.SetStateAction<[] | DietType[]>>;
+  sidebarIsOpen: boolean;
 }
 
 export function AddMeal({
@@ -22,6 +23,7 @@ export function AddMeal({
   setOpenAddMeal,
   setDietList,
   currentDiet,
+  sidebarIsOpen,
 }: PropsType) {
   const { userData, setUserData } = useUserContext();
   const [openModalAddFood, setOpenModalAddFood] = useState(false);
@@ -151,20 +153,20 @@ export function AddMeal({
   };
 
   return (
-    <div className="flex grow justify-between gap-1">
+    <div className="flex grow flex-col justify-between gap-1">
       {openModalAddFood && (
         <>
-          <div className="fixed top-0 left-0 z-100 w-full h-full opacity-50 bg-black"></div>
-          <div className="fixed top-0 left-0 z-100 w-full h-full flex justify-center items-center">
+          <div className="fixed top-0 left-0 z-100 h-full w-full bg-black opacity-50"></div>
+          <div className="fixed top-0 left-0 z-100 flex h-full w-full items-center justify-center">
             <div
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              className="relative flex flex-col items-center z-200 bg-bg border-2 border-border text-2xl text-text-main"
+              className="bg-bg border-border text-text-main relative z-200 flex flex-col items-center border-2 py-5 text-2xl"
             >
               <span
                 onClick={() => setOpenModalAddFood(false)}
-                className="absolute top-0 right-5 cursor-pointer hover:text-error"
+                className="hover:text-error absolute top-0 right-5 cursor-pointer"
               >
                 Close
               </span>
@@ -189,7 +191,7 @@ export function AddMeal({
                   <label htmlFor="Carbons">Carbons:</label>
                   <label htmlFor="Kcal">Kcal:</label>
                 </div>
-                <div className="flex flex-col gap-1 w-2/10">
+                <div className="flex w-2/10 flex-col gap-1">
                   <input
                     onChange={(e) => {
                       if (Number(e.target.value) < 0) return;
@@ -247,7 +249,7 @@ export function AddMeal({
               <div className="py-4">
                 <button
                   onClick={saveAddFoodHandler}
-                  className="cursor-pointer px-4 py-2 border-2 rounded-xl border-border hover:border-button-hover"
+                  className="border-border bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease cursor-pointer rounded-xl border-2 px-4 py-2 transition-colors duration-300 active:scale-96"
                 >
                   Save
                 </button>
@@ -256,72 +258,75 @@ export function AddMeal({
           </div>
         </>
       )}
-      <FoodList
-        addMeal={addMeal}
-        setAddMeal={setAddMeal}
-        setOpenModalAddFood={setOpenModalAddFood}
-      />
-      <div className="w-1/2 relative flex flex-col grow items-center text-text-main text-xl">
-        <div>
-          <span
-            onClick={() => setOpenAddMeal(false)}
-            className="text-text-main text-2xl absolute top-0 right-2 cursor-pointer hover:text-error"
-          >
-            Close
-          </span>
-        </div>
-        <div className="text-2xl">Meal</div>
-        <div>
-          <button
-            onClick={saveMealHandler}
-            className="cursor-pointer border-2 border-border rounded-xl px-4 py-2 hover:border-button-hover"
-          >
-            Save Meal
-          </button>
-        </div>
-        <div className="h-7 text-error">{saveMealNote}</div>
-        <div className="flex flex-col grow w-full border-2 border-border h-30 overflow-y-scroll">
-          <input
-            onChange={(e) => {
-              setAddMeal((prev) => {
-                const newMeal = { ...prev };
-                newMeal.mealName = e.target.value;
-                return newMeal;
-              });
-            }}
-            value={addMeal.mealName}
-            placeholder="Meal name..."
-            className="bg-bg-secondary w-full text-text-main text-xl px-1 outline-none border-b-2 border-border"
-          />
-          {addMeal.meal.map((elem, idx) => (
-            <div
-              className="flex justify-between cursor-pointer hover:bg-bg-secondary"
-              key={Object.keys(elem[1])[0] + idx}
+      <div className="flex w-full grow">
+        <FoodList
+          sidebarIsOpen={sidebarIsOpen}
+          addMeal={addMeal}
+          setAddMeal={setAddMeal}
+          setOpenModalAddFood={setOpenModalAddFood}
+        />
+        <div className="text-text-main relative flex w-1/2 grow flex-col items-center text-xl">
+          <div className="text-2xl">Meal</div>
+          <div>
+            <button
+              onClick={saveMealHandler}
+              className="border-border bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
             >
+              Save Meal
+            </button>
+          </div>
+          <div className="text-error h-7">{saveMealNote}</div>
+          <div className="border-border flex h-30 w-full grow flex-col overflow-y-auto border-2">
+            <input
+              onChange={(e) => {
+                setAddMeal((prev) => {
+                  const newMeal = { ...prev };
+                  newMeal.mealName = e.target.value;
+                  return newMeal;
+                });
+              }}
+              value={addMeal.mealName}
+              placeholder="Meal name..."
+              className="bg-bg-secondary text-text-main border-border w-full border-b-2 px-1 text-xl outline-none"
+            />
+            {addMeal.meal.map((elem, idx) => (
               <div
-                onClick={() => removeFoodFromMeal(idx)}
-                className="flex justify-center w-full truncate"
+                className="hover:bg-bg-secondary flex cursor-pointer justify-between"
+                key={Object.keys(elem[1])[0] + idx}
               >
-                <span>{Object.keys(elem[1])[0]}</span>
+                <div
+                  onClick={() => removeFoodFromMeal(idx)}
+                  className="flex w-full justify-center truncate"
+                >
+                  <span>{Object.keys(elem[1])[0]}</span>
+                </div>
+                <input
+                  onChange={(e) => {
+                    setAddMeal((prev) => {
+                      const newAddMeal = { ...prev };
+                      const newMealFoodList = [...prev.meal];
+                      newMealFoodList[idx][0] = Number(e.target.value);
+                      newAddMeal.meal = newMealFoodList;
+                      return newAddMeal;
+                    });
+                  }}
+                  className="w-1/4"
+                  value={elem[0]}
+                  type="number"
+                />
               </div>
-              <input
-                onChange={(e) => {
-                  setAddMeal((prev) => {
-                    const newAddMeal = { ...prev };
-                    const newMealFoodList = [...prev.meal];
-                    newMealFoodList[idx][0] = Number(e.target.value);
-                    newAddMeal.meal = newMealFoodList;
-                    return newAddMeal;
-                  });
-                }}
-                className="w-1/4"
-                value={elem[0]}
-                type="number"
-              />
-            </div>
-          ))}
-          {showMealSummary(addMeal)}
+            ))}
+            {showMealSummary(addMeal)}
+          </div>
         </div>
+      </div>
+      <div className="flex h-1/10 w-full items-center justify-center">
+        <span
+          onClick={() => setOpenAddMeal(false)}
+          className="border-border bg-bg-secondary active:border-error hover:border-error active:bg-error text-text-main ease cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
+        >
+          Close
+        </span>
       </div>
     </div>
   );

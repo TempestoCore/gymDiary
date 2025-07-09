@@ -13,11 +13,13 @@ interface PropsType {
   setOpenModalAddFood: React.Dispatch<React.SetStateAction<boolean>>;
   setAddMeal: React.Dispatch<React.SetStateAction<MealType>>;
   addMeal: MealType;
+  sidebarIsOpen: boolean;
 }
 export function FoodList({
   setOpenModalAddFood,
   setAddMeal,
   addMeal,
+  sidebarIsOpen,
 }: PropsType) {
   const { userData, setUserData } = useUserContext();
   const [sortByNutrition, setSortByNutrition] =
@@ -34,7 +36,7 @@ export function FoodList({
   const sortFoodList = (
     foodList: FoodType[],
     sortByName: string,
-    sortByNutrition: sortByNutritionType
+    sortByNutrition: sortByNutritionType,
   ) => {
     const sortedFoodList = [...foodList].filter((food) => {
       return Object.keys(food)[0]
@@ -53,8 +55,8 @@ export function FoodList({
             ? -1
             : 1
           : Number(valueA) > Number(valueB)
-          ? -1
-          : 1;
+            ? -1
+            : 1;
       });
     }
 
@@ -80,7 +82,7 @@ export function FoodList({
 
   const ContextMenuHandler = (
     e: React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    idx: number
+    idx: number,
   ) => {
     e.preventDefault();
     setMenu({
@@ -95,7 +97,7 @@ export function FoodList({
     setUserData((prev) => {
       const newUserData = { ...prev };
       const newFoodList = [...newUserData.foodList].filter(
-        (_, idx) => idx != menu.targetId
+        (_, idx) => idx != menu.targetId,
       );
       newUserData.foodList = newFoodList;
       updateUserFoodList(JSON.stringify(newFoodList));
@@ -114,16 +116,16 @@ export function FoodList({
   }, []);
 
   return (
-    <div className="w-1/2 relative flex flex-col grow">
+    <div className="relative flex w-1/2 grow flex-col">
       {menu.visible && (
         <ContextMenu
-          x={menu.x}
+          x={sidebarIsOpen ? menu.x - 200 : menu.x}
           y={menu.y}
           onDelete={deleteFoodFromFoodList}
           onClose={closeMenu}
         />
       )}
-      <div className="flex justify-center text-2xl text-text-main">
+      <div className="text-text-main flex justify-center text-2xl">
         Food List
       </div>
       <div className="flex justify-center">
@@ -131,12 +133,12 @@ export function FoodList({
           onClick={() => {
             setOpenModalAddFood((prev) => !prev);
           }}
-          className="text-text-main text-xl border-2 border-border px-4 py-2 cursor-pointer hover:border-button-hover rounded-xl"
+          className="border-border bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease text-text-main cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
         >
           Add food
         </button>
       </div>
-      <div className="flex flex-wrap justify-around text-text-main text-lg">
+      <div className="text-text-main flex flex-wrap justify-around text-lg">
         <button>Sort:</button>
         <button
           onClick={() => {
@@ -144,7 +146,7 @@ export function FoodList({
           }}
           className={`${
             sortByNutrition == "proteins" ? "text-button" : "text-text-main"
-          } cursor-pointer hover:text-button-hover`}
+          } hover:text-button-hover cursor-pointer`}
         >
           Prot
         </button>
@@ -156,7 +158,7 @@ export function FoodList({
             sortByNutrition == "carbohydrates"
               ? "text-button"
               : "text-text-main"
-          } cursor-pointer hover:text-button-hover`}
+          } hover:text-button-hover cursor-pointer`}
         >
           Carbs
         </button>
@@ -166,7 +168,7 @@ export function FoodList({
           }}
           className={`${
             sortByNutrition == "fats" ? "text-button" : "text-text-main"
-          } cursor-pointer hover:text-button-hover`}
+          } hover:text-button-hover cursor-pointer`}
         >
           Fat
         </button>
@@ -176,7 +178,7 @@ export function FoodList({
           }}
           className={`${
             sortByNutrition == "kcal" ? "text-button" : "text-text-main"
-          } cursor-pointer hover:text-button-hover`}
+          } hover:text-button-hover cursor-pointer`}
         >
           Kcal
         </button>
@@ -184,7 +186,7 @@ export function FoodList({
           onClick={() => {
             setAscSort((prev) => !prev);
           }}
-          className={`w-9 text-text-secondary cursor-pointer hover:text-button-hover`}
+          className={`text-text-secondary hover:text-button-hover w-9 cursor-pointer`}
         >
           {ascSort ? "Asc" : "Desc"}
         </button>
@@ -196,11 +198,11 @@ export function FoodList({
           }}
           value={sortByName}
           placeholder="Find food..."
-          className="bg-bg-secondary w-full text-text-main text-xl px-1 outline-none border-2 border-border"
+          className="bg-bg-secondary text-text-main border-border w-full border-2 px-1 text-xl outline-none"
         />
       </div>
-      <div className="border-2 border-t-0 border-border grow h-10 overflow-y-scroll">
-        <table className="text-text-main w-full table-fixed ">
+      <div className="border-border h-10 grow overflow-y-auto border-2 border-t-0">
+        <table className="text-text-main w-full table-fixed">
           {windowWidth > 1000 ? (
             <tbody>
               <tr className="text-center text-xl">
@@ -217,10 +219,10 @@ export function FoodList({
                     onClick={() => {
                       addFoodToMeal(elem);
                     }}
-                    className="text-xl cursor-pointer text-center hover:bg-bg-secondary transition-colors duration-100"
+                    className="hover:bg-bg-secondary cursor-pointer text-center text-xl transition-colors duration-100"
                     key={idx}
                   >
-                    <td className="text-center truncate">
+                    <td className="truncate text-center">
                       {Object.keys(elem)}
                     </td>
                     <td>{elem[Object.keys(elem)[0]].proteins}</td>
@@ -228,7 +230,7 @@ export function FoodList({
                     <td>{elem[Object.keys(elem)[0]].carbohydrates}</td>
                     <td>{elem[Object.keys(elem)[0]].kcal}</td>
                   </tr>
-                )
+                ),
               )}
             </tbody>
           ) : (
@@ -240,10 +242,10 @@ export function FoodList({
                     onClick={() => {
                       addFoodToMeal(elem);
                     }}
-                    className="cursor-pointer text-center flex flex-col hover:bg-bg-secondary transition-colors duration-100"
+                    className="hover:bg-bg-secondary flex cursor-pointer flex-col text-center transition-colors duration-100"
                     key={idx}
                   >
-                    <td className="text-xl truncate">{Object.keys(elem)}</td>
+                    <td className="truncate text-xl">{Object.keys(elem)}</td>
                     <td
                       className={` ${
                         sortByNutrition === "proteins"
@@ -281,7 +283,7 @@ export function FoodList({
                       {"Kcal: " + elem[Object.keys(elem)[0]].kcal}
                     </td>
                   </tr>
-                )
+                ),
               )}
             </tbody>
           )}

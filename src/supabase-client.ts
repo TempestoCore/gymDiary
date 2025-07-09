@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { PlanType, ExerciseType } from "./types";
+import type { PlanType } from "./types";
 export const supabase = createClient(
   import.meta.env.VITE_API_ADDRESS,
   import.meta.env.VITE_API_KEY,
@@ -19,11 +19,18 @@ export const updateUserPlans = async (plans: PlanType[]) => {
   }
 };
 
-export const createWorkoutData = async (planName: string) => {
+export const createWorkoutData = async (
+  planName: string,
+  workoutDate: number,
+) => {
   const user = await getUser();
-  const { error: insertError } = await supabase
-    .from("workoutData")
-    .insert([{ user_id: user?.user.id, workoutPlan: planName }]);
+  const { error: insertError } = await supabase.from("workoutData").insert([
+    {
+      user_id: user?.user.id,
+      workoutPlan: planName,
+      workoutDate: workoutDate,
+    },
+  ]);
   if (insertError) {
     console.log("Insert workout data error: " + insertError.message);
   }
@@ -63,37 +70,27 @@ export const getWorkoutData = async (date?: number) => {
   }
 };
 
-export const updateWorkoutData = async (
-  date: number,
-  data?: ExerciseType[] | [],
-  workoutStatus?: boolean,
-) => {
+export const updateWorkoutData = async (workoutDate: number, data: string) => {
   const user = await getUser();
-  const workoutDate = new Date(date);
-  const dateStr = workoutDate.toISOString().split("T")[0];
-  const startDate = `${dateStr}T00:00:00+00:00`;
-  const endDate = `${dateStr}T23:59:59.999999+00:00`;
-  if (data) {
-    const { error } = await supabase
-      .from("workoutData")
-      .update({ workout: JSON.stringify(data) })
-      .eq("user_id", user?.user.id)
-      .gte("created_at", startDate)
-      .lt("created_at", endDate);
-    if (error) {
-      console.error(error.message);
-    }
+  const { error } = await supabase
+    .from("workoutData")
+    .update({ workout: JSON.stringify(data) })
+    .eq("user_id", user?.user.id)
+    .eq("workoutDate", workoutDate);
+  if (error) {
+    console.error(error.message);
   }
-  if (workoutStatus) {
-    const { error } = await supabase
-      .from("workoutData")
-      .update({ workoutStatus: workoutStatus })
-      .eq("user_id", user?.user.id)
-      .gte("created_at", startDate)
-      .lt("created_at", endDate);
-    if (error) {
-      console.error(error.message);
-    }
+};
+
+export const deleteWorkoutData = async (workoutDate: number) => {
+  const user = await getUser();
+  const { error } = await supabase
+    .from("workoutData")
+    .delete()
+    .eq("workoutDate", workoutDate)
+    .eq("user_id", user?.user.id);
+  if (error) {
+    console.error(error.message);
   }
 };
 

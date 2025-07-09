@@ -48,12 +48,12 @@ export function CreateDiet({
     setCreateNewDiet(false);
   };
   return (
-    <div className="flex relative flex-col justify-center items-center grow">
-      <div className="absolute top-5 right-5 text-2xl text-text-main">
+    <div className="relative flex w-full grow flex-col items-center justify-center">
+      <div className="text-text-main absolute top-5 right-5 text-2xl">
         {userData.dietList.length > 0 && (
           <span
             onClick={() => setCreateNewDiet(false)}
-            className="cursor-pointer hover:text-error"
+            className="hover:text-error active:text-error cursor-pointer"
           >
             Close
           </span>
@@ -67,13 +67,13 @@ export function CreateDiet({
           setDietName(e.target.value);
         }}
         value={dietName}
-        className="w-100 h-15 text-text-main text-xl outline-none border-2 bg-bg-secondary border-border rounded-xl px-2"
+        className="text-text-main bg-bg-secondary border-border h-15 w-9/10 rounded-xl border-2 px-2 text-xl outline-none md:w-2/5"
         type="text"
         placeholder="Diet name..."
       />
       <button
         onClick={saveHandler}
-        className="mt-4 py-5 px-10 text-text-main text-2xl border-2 bg-bg-secondary border-border rounded-xl hover:bg-button-hover transition-colors duration-300"
+        className="text-text-main bg-bg-secondary border-border hover:bg-button-hover mt-4 rounded-xl border-2 px-10 py-5 text-2xl transition-colors duration-300"
       >
         Create a new diet
       </button>

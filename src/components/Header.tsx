@@ -38,7 +38,7 @@ export function Header({
     <header className="bg-bg-secondary border-border flex h-15 w-full items-center justify-between border-b-2">
       <PiTextAlignLeft
         onClick={() => {
-          if (!isUserSignIn) return;
+          // if (!isUserSignIn) return;
           setSidebarIsOpen(true);
           setModalIsOpen(true);
         }}

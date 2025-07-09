@@ -33,11 +33,11 @@ export function Sidebar({
 
   return (
     <div
-      className={`bg-bg fixed top-0 left-0 z-60 flex h-screen flex-col md:relative ${
-        sidebarIsOpen ? "w-50 translate-x-0" : "w-0 -translate-x-50"
-      } border-border border-r-2 transition-all duration-300`}
+      className={`bg-bg fixed top-0 left-0 z-60 flex h-full flex-col overflow-x-hidden md:relative ${
+        sidebarIsOpen ? "w-50 border-r-2" : "w-0"
+      } border-border transition-all duration-300`}
     >
-      <div className="border-border bg-bg-secondary flex h-15 w-full items-center justify-between overflow-hidden border-b-2">
+      <div className="border-border bg-bg-secondary flex h-15 w-50 items-center justify-around overflow-hidden border-b-2">
         <h1 className="text-button nowrap ml-2 flex w-30 text-2xl whitespace-nowrap">
           Gym Dairy
         </h1>
@@ -46,7 +46,7 @@ export function Sidebar({
             setModalIsOpen(false);
             setSidebarIsOpen(false);
           }}
-          className="text-text-main active:text-button-hover hover:text-button-hover mr-5 size-10 cursor-pointer transition-colors duration-300"
+          className="text-text-main active:text-button-hover hover:text-button-hover mr-10 size-10 cursor-pointer transition-colors duration-300"
         />
       </div>
       <ul className="text-text-main flex flex-col text-2xl">
@@ -99,7 +99,7 @@ export function Sidebar({
       <div className="flex grow flex-col items-center justify-end pb-10">
         <button
           onClick={switchThemeHandler}
-          className="bg-bg-secondary active:bg-button-hover border-border text-text-main hover:bg-button-hover transition-color w-5/10 cursor-pointer overflow-hidden rounded-xl border-2 py-2 text-2xl duration-300 select-none active:scale-96"
+          className="border-border bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease text-text-main cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
         >
           Theme
         </button>
