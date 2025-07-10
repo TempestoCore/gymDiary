@@ -49,6 +49,7 @@ function App() {
           setModalIsOpen={setModalIsOpen}
           setOpenTab={setOpenTab}
           openTab={openTab}
+          isUserSignIn={isUserSignIn}
         />
         <div className="flex h-full w-full flex-col">
           <Header
@@ -65,7 +66,7 @@ function App() {
             <Diet sidebarIsOpen={sidebarIsOpen} />
           ) : openTab === "Plan" ? (
             <Plan />
-          ) : openTab === "Statistics" ? (
+          ) : openTab === "History" && isUserSignIn ? (
             <Statistics />
           ) : (
             <Home isUserSignIn={isUserSignIn} />

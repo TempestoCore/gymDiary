@@ -1,189 +1,176 @@
 import { useState, useEffect } from "react";
-import LineChart from "./LineChart";
-import { getWorkoutStatistics } from "../../supabase-client";
 import { useUserContext } from "../useUserContext";
-import type { ExerciseType, PlanType } from "../../types";
-import type { ChartOptions, TooltipItem } from "chart.js";
-
-const getWorkoutVolumeArr = (
-  workoutStatistics: { created_at: string; workout: string }[],
-  exercise: string
-) => {
-  const workoutVolumeArr: { date: string; volume: number }[] = [];
-
-  workoutStatistics.forEach((elem) => {
-    const workoutVolume = { date: "", volume: 0 };
-    workoutVolume.date = elem.created_at.slice(0, 10);
-    let volume = 0;
-
-    try {
-      const workoutData: ExerciseType[] = JSON.parse(elem.workout);
-      workoutData.forEach((workoutElem) => {
-        if (workoutElem.exerciseName === exercise) {
-          workoutElem.weightRep.forEach((exer) => {
-            volume += exer[0] * exer[1];
-          });
-        }
-      });
-    } catch (e) {
-      console.error("Error parsing workout data:", e);
-    }
-
-    workoutVolume.volume = volume;
-    if (volume > 0) {
-      workoutVolumeArr.push(workoutVolume);
-    }
-  });
-
-  return workoutVolumeArr.sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-};
-
-const weekDays = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-] as const;
-
-const getAllPlanExerciseNames = (plan: PlanType) => {
-  const namesArr: string[] = [];
-  weekDays.forEach((key) => {
-    plan[key].forEach((elem) => {
-      if (namesArr.includes(elem.exerciseName)) return;
-      namesArr.push(elem.exerciseName);
-    });
-  });
-  return namesArr;
-};
-
+import { getWorkoutData } from "../../supabase-client";
+import type { ExerciseType } from "../../types";
+import { TransitionAnimation } from "../animation/TransitionAnimation";
+interface loadedDataType {
+  workoutDate: number;
+  workout: ExerciseType[];
+}
 export function Statistics() {
   const { userData, currentPlanIdx } = useUserContext();
-  const [exerciseName, setExercisesName] = useState(
-    userData.planList
-      ? getAllPlanExerciseNames(userData.planList[currentPlanIdx])[1]
-      : ""
+  const [period, setPeriod] = useState([0, 0]);
+  const [planName, setPlanName] = useState(
+    userData.planList[currentPlanIdx].planName,
   );
-  const [workoutVolumeForShow, setWorkoutVolumeForShow] = useState<
-    { x: string; y: number }[]
-  >([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadedData, setLoadedData] = useState<loadedDataType[] | []>([]);
+  const getDateString = (date: number) => {
+    const dateObj = new Date(date);
+    const day = dateObj.getDate();
+    const month = dateObj.getMonth() + 1;
+    const year = dateObj.getFullYear();
+
+    return `${day < 10 ? `0${day}` : day}.${month < 10 ? `0${month}` : month}.${year}`;
+  };
+
+  const saveHandler = () => {
+    const data = loadedData;
+    const jsonStr = JSON.stringify(data);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${planName}${getDateString(period[0])}-${getDateString(period[1])}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await getWorkoutStatistics(
-          userData.planList[currentPlanIdx].planName
-        );
-        if (res) {
-          const volumeData = getWorkoutVolumeArr(res, exerciseName).map(
-            (item) => ({
-              x: item.date,
-              y: item.volume,
-            })
-          );
-          setWorkoutVolumeForShow(volumeData);
-        }
-      } catch (error) {
-        console.error("Error fetching workout statistics:", error);
-      } finally {
-        setLoading(false);
+    if (!loading) return;
+    getWorkoutData(period, planName).then((res) => {
+      if (typeof res === "object") {
+        console.log(res);
+
+        setLoadedData(() => {
+          const arrValue: loadedDataType[] = [];
+          res.forEach((elem) => {
+            const value: loadedDataType = {
+              workout: JSON.parse(JSON.parse(elem.workout)),
+              workoutDate: elem.workoutDate,
+            };
+            arrValue.push(value);
+          });
+          console.log(arrValue);
+          return arrValue;
+        });
       }
-    };
-
-    fetchData();
-  }, [userData, currentPlanIdx, exerciseName]);
-
-  const chartData = {
-    datasets: [
-      {
-        label: "Workout volume",
-        data: workoutVolumeForShow,
-        borderColor: "rgb(75, 192, 192)",
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
-        tension: 0.1,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-      },
-    ],
-  };
-
-  const options: ChartOptions<"line"> = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: `Workout volume per exercise: ${exerciseName}`,
-      },
-      tooltip: {
-        callbacks: {
-          label: (context: TooltipItem<"line">) => {
-            const label = context.dataset.label || "";
-            const value = context.parsed.y;
-            return `${label}: ${value} кг`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "month",
-          displayFormats: {
-            month: "MMM yyyy",
-          },
-          tooltipFormat: "dd.MM.yyyy",
-        },
-        title: {
-          display: true,
-          text: "Date",
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: "Volume",
-        },
-        min: 0,
-      },
-    },
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (workoutVolumeForShow.length === 0) {
-    return <div>No data to show</div>;
-  }
+      setLoading(false);
+    });
+  }, [loading, period, planName]);
 
   return (
-    <div className="w-full h-1/2">
-      {!userData.planList ? (
-        <div></div>
-      ) : (
-        <div>
-          <select
-            onChange={(e) => {
-              setExercisesName(e.target.value);
-            }}
-            name=""
-            id=""
-          >
-            {getAllPlanExerciseNames(userData.planList[currentPlanIdx]).map(
-              (elem, idx) => (
-                <option key={elem + idx}>{elem}</option>
-              )
-            )}
-          </select>
-        </div>
-      )}
-      <LineChart data={chartData} options={options} />
+    <div className="text-text-main flex h-[calc(100%-60px)] w-full flex-col items-center gap-6 overflow-x-hidden overflow-y-auto text-2xl">
+      <div>
+        <span>Get workout in time period</span>
+      </div>
+      <div>
+        <span>Plan: </span>
+        <select
+          defaultValue={planName}
+          onChange={(e) => {
+            setPlanName(e.target.value);
+          }}
+          className="outline-0"
+        >
+          {userData.planList.map((elem, idx) => (
+            <option key={elem.planName + idx}>{elem.planName}</option>
+          ))}
+        </select>
+      </div>
+      <div className="flex gap-4 text-xl">
+        <label htmlFor="from">From:</label>
+        <input
+          className="outline-0"
+          id="from"
+          onChange={(e) => {
+            setPeriod((prev) => {
+              const newPeriod = [...prev];
+              newPeriod[0] = new Date(e.target.value).getTime();
+              return newPeriod;
+            });
+          }}
+          type="date"
+        />
+        <label htmlFor="To">To:</label>
+        <input
+          className="outline-0"
+          id="To"
+          onChange={(e) => {
+            setPeriod((prev) => {
+              const newPeriod = [...prev];
+              newPeriod[1] = new Date(e.target.value).getTime();
+              return newPeriod;
+            });
+          }}
+          type="date"
+        />
+      </div>
+      <div className="flex w-full items-center justify-center gap-10">
+        <button
+          onClick={() => {
+            setLoading(true);
+          }}
+          className="border-border bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease text-text-main cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
+        >
+          Get
+        </button>
+        <button
+          onClick={saveHandler}
+          className={`border-border bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease text-text-main cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96 ${loadedData.length === 0 && "pointer-events-none opacity-50"}`}
+        >
+          Save as JSON
+        </button>
+      </div>
+      <div className="flex w-full grow flex-col items-center gap-2 pb-4">
+        {loading ? (
+          <TransitionAnimation />
+        ) : loadedData.length === 0 ? (
+          <div>No data to show</div>
+        ) : (
+          <>
+            {loadedData.map((elem) => (
+              <div
+                className="border-border flex w-9/10 flex-col items-center border-2 border-b-0 md:w-3/5"
+                key={elem.workoutDate}
+              >
+                <span className="border-border bg-button-hover w-full border-b-2 text-center">
+                  {getDateString(elem.workoutDate)}
+                </span>
+                {elem.workout.map((exercise, exerIdx) => (
+                  <div
+                    className="flex w-full flex-col items-center"
+                    key={exercise.exerciseName + exerIdx}
+                  >
+                    <div className="border-border bg-bg-secondary w-full border-b-2 text-center">
+                      {exercise.exerciseName}
+                    </div>
+                    <div className="border-border flex w-full border-b-2">
+                      <span className="border-border w-1/2 border-r-2 text-center">
+                        Rep
+                      </span>
+                      <span className="w-1/2 text-center">Weight</span>
+                    </div>
+                    {exercise.weightRep.map((set, setIdx) => (
+                      <div
+                        className={`border-border flex w-full border-b-2`}
+                        key={exercise.exerciseName + elem.workoutDate + setIdx}
+                      >
+                        <span className="border-border w-1/2 border-r-2 text-center">
+                          {set[0]}
+                        </span>
+                        <span className="w-1/2 text-center">{set[1]}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 }

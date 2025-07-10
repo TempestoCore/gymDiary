@@ -36,38 +36,20 @@ export const createWorkoutData = async (
   }
 };
 
-export const getWorkoutData = async (date?: number) => {
-  try {
-    const user = await getUser();
-    if (!user?.user?.id) return [];
-
-    const query = supabase
-      .from("workoutData")
-      .select("*")
-      .eq("user_id", user.user.id);
-
-    if (date) {
-      const workoutDate = new Date(date);
-      const dateStr = workoutDate.toISOString().split("T")[0];
-
-      const startDate = `${dateStr}T00:00:00+00:00`;
-      const endDate = `${dateStr}T23:59:59.999999+00:00`;
-
-      query.gte("created_at", startDate).lt("created_at", endDate);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Get workout data error:", error.message);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error("Error in getWorkoutData:", error);
-    return [];
+export const getWorkoutData = async (date: number[], plan: string) => {
+  const user = await getUser();
+  const { data, error } = await supabase
+    .from("workoutData")
+    .select("*")
+    .not("workout", "is", null)
+    .eq("user_id", user?.user.id)
+    .eq("workoutPlan", plan)
+    .gte("workoutDate", date[0])
+    .lte("workoutDate", date[1]);
+  if (error) {
+    return error.message;
   }
+  return data;
 };
 
 export const updateWorkoutData = async (workoutDate: number, data: string) => {

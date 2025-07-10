@@ -1,6 +1,6 @@
 import { useUserContext } from "../useUserContext";
 import type { DietType } from "../../types";
-
+import { TransitionAnimation } from "../animation/TransitionAnimation";
 interface PropsType {
   isUserSignIn: boolean;
 }
@@ -47,8 +47,8 @@ export function Home({ isUserSignIn }: PropsType) {
     });
 
     return (
-      <div className="w-full flex px-2">
-        <div className="w-full text-xl text-text-main text-center border-2 border-border rounded-xl">
+      <div className="flex w-full px-2">
+        <div className="text-text-main border-border w-full rounded-xl border-2 text-center text-xl">
           Proteins - {sum.prot}. Carbs - {sum.carbs}. Fats - {sum.fats}. - Kcal
           - {sum.kcal}.
         </div>
@@ -59,29 +59,17 @@ export function Home({ isUserSignIn }: PropsType) {
   return (
     <>
       {loadingData ? (
-        <div className="flex flex-col justify-center grow gap-1">
-          <div className="flex flex-col items-center justify-center grow gap-1 border-b-2 border-border">
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-          </div>
-          <div className="flex flex-col items-center justify-center grow gap-1">
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-            <div className="h-6 w-1/2 bg-button-hover animate-pulse rounded-2xl"></div>
-          </div>
-        </div>
+        <TransitionAnimation />
       ) : !isUserSignIn ? (
-        <div className="flex grow mx-10 items-center justify-center text-2xl text-text-main">
-          To start using this web application, please sign up and/or sing in.
+        <div className="text-text-main mx-10 flex grow items-center justify-center text-2xl">
+          To be able save data and see history of your workouts between
+          sessions, please sign In.
         </div>
       ) : (
-        <div className="flex flex-col justify-center grow gap-1">
+        <div className="flex grow flex-col justify-center gap-1">
           {userData.planList && (
-            <div className="flex flex-col items-center gap-2 pt-2 pb-6 border-b-2 border-border">
-              <div className="text-2xl text-text-main">
+            <div className="border-border flex flex-col items-center gap-2 border-b-2 pt-2 pb-6">
+              <div className="text-text-main text-2xl">
                 {"Current workout plan: " +
                   userData.planList[currentPlanIdx].planName}
               </div>
@@ -89,11 +77,6 @@ export function Home({ isUserSignIn }: PropsType) {
                 <div>For today there are no workout</div>
               ) : (
                 <div className="flex flex-col">
-                  <div className="text-xl text-text-secondary">
-                    {userData.workoutStatus
-                      ? "Today workout is complete"
-                      : "Today workout is not complete"}
-                  </div>
                   <div className="columns-2">
                     {userData.planList[currentPlanIdx][currentDay].map(
                       (elem, idx) => (
@@ -103,7 +86,7 @@ export function Home({ isUserSignIn }: PropsType) {
                         >
                           {elem.exerciseName}
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
@@ -111,15 +94,15 @@ export function Home({ isUserSignIn }: PropsType) {
             </div>
           )}
           {userData.dietList[currentDietIdx] && (
-            <div className="flex flex-col w-full items-center grow gap-2 pt-2">
-              <div className="text-2xl text-text-main">
+            <div className="flex w-full grow flex-col items-center gap-2 pt-2">
+              <div className="text-text-main text-2xl">
                 {"Current diet: " + userData.dietList[currentDietIdx].dietName}
               </div>
-              <div className="columns-2 gap-2 w-full px-2">
+              <div className="w-full columns-2 gap-2 px-2">
                 {userData.dietList[currentDietIdx][currentDay].map(
                   (elem, idx) => (
                     <div
-                      className="text-text-main text-xl rounded-xl text-center border-2 border-border mb-2 break-inside-avoid"
+                      className="text-text-main border-border mb-2 break-inside-avoid rounded-xl border-2 text-center text-xl"
                       key={elem.mealName + idx}
                     >
                       {elem.mealName}
@@ -132,7 +115,7 @@ export function Home({ isUserSignIn }: PropsType) {
                         </div>
                       ))}
                     </div>
-                  )
+                  ),
                 )}
               </div>
               {calNutritionSum(userData.dietList[currentDietIdx])}

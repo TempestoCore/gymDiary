@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { userContext } from "./useUserContext";
 import type { PlanType, UserDataType } from "../types";
-import {
-  getUserPlans,
-  getWorkoutData,
-  getUserDietData,
-} from "../supabase-client";
+import { getUserPlans, getUserDietData } from "../supabase-client";
 export function UserContextProvider({
   children,
 }: {
@@ -26,22 +22,6 @@ export function UserContextProvider({
         } catch (error) {
           console.error("Error parsing plans:", error);
         }
-      }
-    };
-
-    const checkWorkoutIsCompleted = async (date: number) => {
-      const workoutData = await getWorkoutData(date);
-
-      if (workoutData.length > 0) {
-        setUserData((prev) => ({
-          ...prev,
-          workoutStatus: workoutData[0].workoutStatus,
-        }));
-      } else {
-        setUserData((prev) => ({
-          ...prev,
-          workoutStatus: false,
-        }));
       }
     };
 
@@ -68,11 +48,9 @@ export function UserContextProvider({
       return;
     };
 
-    Promise.all([
-      loadPlans(),
-      checkWorkoutIsCompleted(new Date().getTime()),
-      setUserDietData(),
-    ]).then(() => setLoadingData(false));
+    Promise.all([loadPlans(), setUserDietData()]).then(() =>
+      setLoadingData(false),
+    );
   }, []);
   return (
     <userContext.Provider

@@ -9,6 +9,7 @@ interface PropsType {
   sidebarIsOpen: boolean;
   setOpenTab: React.Dispatch<React.SetStateAction<string>>;
   openTab: string;
+  isUserSignIn: boolean;
 }
 
 export function Sidebar({
@@ -17,6 +18,7 @@ export function Sidebar({
   setSidebarIsOpen,
   setOpenTab,
   openTab,
+  isUserSignIn,
 }: PropsType) {
   const openTapHandler = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
     setOpenTab(`${e.currentTarget.innerText}`);
@@ -90,10 +92,10 @@ export function Sidebar({
           onClick={(e) => {
             openTapHandler(e);
           }}
-          className={`hover:bg-bg-secondary active:bg-bg-secondary hover:border-border ${openTab === "Statistics" ? "bg-bg-secondary border-border" : "border-0"} flex h-13 w-full cursor-pointer items-center gap-1 pl-2 select-none hover:border-y-2`}
+          className={`hover:bg-bg-secondary active:bg-bg-secondary hover:border-border ${openTab === "Statistics" ? "bg-bg-secondary border-border" : "border-0"} flex h-13 w-full cursor-pointer items-center gap-1 pl-2 select-none hover:border-y-2 ${!isUserSignIn && "pointer-events-none opacity-50"}`}
         >
           <IoIosStats className="text-button" />
-          Statistics
+          History
         </li>
       </ul>
       <div className="flex grow flex-col items-center justify-end pb-10">

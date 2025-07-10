@@ -54,16 +54,16 @@ export function CreatePlan({
   return (
     <>
       {!create && !createNewPlan ? (
-        <div className="flex flex-col justify-center items-center grow">
+        <div className="flex grow flex-col items-center justify-center">
           <button
             onClick={() => setCreate(true)}
-            className="py-5 px-10 border-2 border-border bg-bg-secondary text-text-main text-2xl rounded-xl hover:bg-button-hover transition-colors duration-300"
+            className="border-border bg-bg-secondary text-text-main hover:bg-button-hover rounded-xl border-2 px-10 py-5 text-2xl transition-colors duration-300"
           >
             Create a new plan.
           </button>
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center grow">
+        <div className="flex grow flex-col items-center justify-center">
           <input
             onKeyDown={(e) => {
               if (e.key == "Enter") saveHandler();
@@ -72,16 +72,26 @@ export function CreatePlan({
               setPlanName(e.target.value);
             }}
             value={planName}
-            className="w-100 h-15 text-text-main text-xl outline-none border-2 bg-bg-secondary border-border rounded-xl px-2"
+            className="text-text-main bg-bg-secondary border-border h-15 w-100 rounded-xl border-2 px-2 text-xl outline-none"
             type="text"
             placeholder="Plan name..."
           />
-          <button
-            onClick={saveHandler}
-            className="mt-4 py-5 px-10 text-text-main text-2xl border-2 bg-bg-secondary border-border rounded-xl hover:bg-button-hover transition-colors duration-300"
-          >
-            Save
-          </button>
+          <div className="flex w-full justify-center gap-10 pt-10">
+            <button
+              onClick={saveHandler}
+              className="border-border bg-bg-secondary active:border-button hover:border-button active:bg-button-hover ease text-text-main cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => {
+                setCreateNewPlan(false);
+              }}
+              className="border-border bg-bg-secondary active:border-error hover:border-error active:bg-error ease text-text-main cursor-pointer rounded-xl border-2 px-4 py-2 text-2xl transition-colors duration-300 active:scale-96"
+            >
+              Close
+            </button>
+          </div>
           {createPlanNote && (
             <span className="text-error text-xl">{createPlanNote}</span>
           )}

@@ -65,7 +65,7 @@ export function Plan() {
   }, []);
 
   return (
-    <div className="flex h-[calc(100%-60px)] flex-col overflow-y-auto">
+    <div className="relative flex h-[calc(100%-60px)] flex-col overflow-y-auto">
       {planList.length == 0 || createNewPlan ? (
         <CreatePlan
           setPlanList={setPlanList}
@@ -132,8 +132,6 @@ export function Plan() {
               <div
                 onClick={() => {
                   setPlanList((prev) => {
-                    console.log("Добавление упражнения");
-                    console.log(planList);
                     const newArr = [...prev];
                     const newExercise: ExerciseType = {
                       exerciseName: `Exercise - ${newArr[currentPlan][currentDay].length}`,

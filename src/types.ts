@@ -2,7 +2,6 @@ export interface UserDataType {
   planList: PlanType[];
   foodList: FoodType[];
   dietList: DietType[];
-  workoutStatus: boolean;
 }
 
 export interface PlanType {
