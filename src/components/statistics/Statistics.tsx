@@ -80,10 +80,10 @@ export function Statistics() {
           ))}
         </select>
       </div>
-      <div className="flex gap-4 text-xl">
+      <div className="flex flex-col gap-4 text-xl md:flex-row">
         <label htmlFor="from">From:</label>
         <input
-          className="outline-0"
+          className="bg-bg-secondary outline-0"
           id="from"
           onChange={(e) => {
             setPeriod((prev) => {
@@ -96,7 +96,7 @@ export function Statistics() {
         />
         <label htmlFor="To">To:</label>
         <input
-          className="outline-0"
+          className="bg-bg-secondary outline-0"
           id="To"
           onChange={(e) => {
             setPeriod((prev) => {
